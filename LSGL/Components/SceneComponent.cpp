@@ -123,9 +123,9 @@ namespace lsgl
 		setLocalRotation(localTransform.rotation + Vector3(0, angle, 0));
 	}
 
-	void SceneComponent::attachTo(SceneComponent & parent)
+	void SceneComponent::attachTo(SceneComponent& inParent)
 	{
-		this->parent = &parent;
+		this->parent = &inParent;
 		setTransformDirty();
 	}
 

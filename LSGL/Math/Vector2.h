@@ -25,7 +25,7 @@ namespace lsgl
 		Vector2& inverse();
 		LSFloat length()
 		{
-			return std::sqrtf(x * x + y * y);
+			return sqrt(x * x + y * y);
 		}
 		Vector2& normalize()
 		{

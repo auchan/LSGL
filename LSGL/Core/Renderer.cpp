@@ -1,7 +1,9 @@
 #include <algorithm>
 #include <map>
-#include "Renderer.h"
 #include <ctime>
+
+#include "Renderer.h"
+#include "Shader/Shader.h"
 
 namespace lsgl
 {
@@ -34,7 +36,7 @@ namespace lsgl
 		delete depthBuffer;
 	}
 
-	void Renderer::renderVertices(const Vertexes &vertices, const Matrix4x4& M, const Matrix4x4& V, const Matrix4x4& P, RenderMode renderMode)
+	void Renderer::renderVertices(const Vertexes &vertices, RenderMode renderMode)
 	{
 		clock_t beginTime = clock();
 		setPixelCount = 0;
@@ -47,19 +49,35 @@ namespace lsgl
 				break;
 			}
 
-			renderTriangle(vertices[i], vertices[i + 1], vertices[i + 2], M, V, P, renderMode);
+			renderTriangle(vertices[i], vertices[i + 1], vertices[i + 2], renderMode);
 		}
 		clock_t endTime = clock();
-		double deltaTime = (double)(endTime - beginTime) * 1000 / CLOCKS_PER_SEC;
+		LSFloat deltaTime = (LSFloat)(endTime - beginTime) * 1000 / CLOCKS_PER_SEC;
 		//printf2("render use %f ms\n", deltaTime);
 	}
 
-	void Renderer::renderTriangle(const Vertex & p0, const Vertex & p1, const Vertex & p2, const Matrix4x4& M, const Matrix4x4& V, const Matrix4x4& P, RenderMode renderMode)
+	void Renderer::renderTriangle(const Vertex & p0, const Vertex & p1, const Vertex & p2, RenderMode renderMode)
 	{
 		Vertex np0 = p0, np1 = p1, np2 = p2;
-		np0.position = (P*V*M)*p0.position;
-		np1.position = (P*V*M)*p1.position;
-		np2.position = (P*V*M)*p2.position;
+		if (shader)
+		{
+			shader->vertex = &np0;
+			np0.position = shader->vertexShading();
+			shader->vertex = &np1;
+			np1.position = shader->vertexShading();
+			shader->vertex = &np2;
+			np2.position = shader->vertexShading();
+		}
+		else
+		{
+			//todo: ensure valid
+			Shader::UniformBufferBase* baseUniformBuffer = reinterpret_cast<Shader::UniformBufferBase*>(getDescriptor("_Base")->data);
+			Matrix4x4 &mvpMat = baseUniformBuffer->mvpMatrix;
+
+			np0.position = (mvpMat) * p0.position;
+			np1.position = (mvpMat) * p1.position;
+			np2.position = (mvpMat) * p2.position;
+		}
 		Vertexes vertexesInput = { np0, np1, np2 };
 		Vertexes vertexes;
 		clip(vertexesInput, vertexes);
@@ -112,7 +130,7 @@ namespace lsgl
 
 			Vector4 &pos0 = v0.position;
 			Vector4 &pos1 = v1.position;
-			float clipAlpha = 0;
+			LSFloat clipAlpha = 0.0f;
 			LSFloat absw0 = std::fabs(pos0.w);
 			LSFloat absw1 = std::fabs(pos1.w);
 
@@ -148,12 +166,12 @@ namespace lsgl
 
 			int sign0 = 1;// pos0.w >= 0 ? 1 : -1;
 			int sign1 = 1;// pos1.w >= 0 ? 1 : -1;
-			double x0 = sign0 * pos0.x;
-			double x1 = sign1 * pos1.x;
-			double y0 = sign0 * pos0.y;
-			double y1 = sign1 * pos1.y;
-			double z0 = sign0 * pos0.z;
-			double z1 = sign1 * pos1.z;
+			LSFloat x0 = sign0 * pos0.x;
+			LSFloat x1 = sign1 * pos1.x;
+			LSFloat y0 = sign0 * pos0.y;
+			LSFloat y1 = sign1 * pos1.y;
+			LSFloat z0 = sign0 * pos0.z;
+			LSFloat z1 = sign1 * pos1.z;
 
 			switch (stage)
 			{
@@ -200,7 +218,7 @@ namespace lsgl
 			case 6:
 				regionCode0 = (z0 >= absw0 ? topBitCode : 0);
 				regionCode1 = (z1 >= absw1 ? topBitCode : 0);
-				if (regionCode0 ^ regionCode1 != 0)
+				if ((regionCode0 ^ regionCode1) != 0)
 				{
 					clipAlpha = (absw0 - z0) / (z1 - z0);
 				}
@@ -306,19 +324,19 @@ namespace lsgl
 
 
 		typedef std::vector<Edge> Edges;
-		Edges edges;
-		for (int i = 0, size = points.size(); i < size; ++i)
+		Edges edgeVector;
+		for (size_t i = 0, size = points.size(); i < size; ++i)
 		{
-			int j = i + 1;
+			size_t j = i + 1;
 			if (j == size)
 			{
 				j = 0;
 			}
-			edges.push_back({ points[i], points[j], validVertexes[i], validVertexes[j] });
+			edgeVector.push_back({ points[i], points[j], validVertexes[i], validVertexes[j] });
 		}
 
 		std::map<int, Edges> edgesMap;
-		for (const Edge &edge : edges)
+		for (const Edge &edge : edgeVector)
 		{
 			int key = edge.pLow.y;
 			if (edgesMap.find(key) == edgesMap.end())
@@ -334,10 +352,9 @@ namespace lsgl
 		Edge *prevEedge = nullptr;
 		auto cur = edgesMap.begin();
 		auto edgesMapEnd = edgesMap.end();
-		int count = 0;
 		Vertex	vertexLeft, vertexRight;
 		Vertex	vertexTmp1, vertexTmp2;
-		double nearest = 1 / DEPTH_MAX;
+		//LSFloat nearest = 1 / DEPTH_MAX;
 		for (; cur != edgesMapEnd; ++cur)
 		{
 			Edges &edges = cur->second;
@@ -389,11 +406,11 @@ namespace lsgl
 				}
 			});
 
-			int edgeCount = edges.size();
+			size_t edgeCount = edges.size();
 			Edge &edgeLeft = edges[0];
 			int lineY = 0;
 			int higherX = 0;
-			for (int i = 1; i < edgeCount; ++i)
+			for (size_t i = 1; i < edgeCount; ++i)
 			{
 				Edge &edgeRight = edges[i];
 				int xleft = edgeLeft.pLow.x;
@@ -438,7 +455,7 @@ namespace lsgl
 						Vertex::add(vertexTmp1, vertexTmp2, finalVertex);
 
 						// depth test
-						DepthFormat depth = finalVertex.position.z * DEPTH_MAX;//finalVertex.position.z > nearest ? UINT64_MAX - (1 / finalVertex.position.z) : 0;
+						DepthFormat depth = static_cast<DepthFormat>(finalVertex.position.z * DEPTH_MAX);//finalVertex.position.z > nearest ? UINT64_MAX - (1 / finalVertex.position.z) : 0;
 						DepthFormat *existDepthPtr = reinterpret_cast<DepthFormat*>(depthBuffer->getPixelUnit(x, y));
 						if (existDepthPtr && depth < *existDepthPtr)
 						{
@@ -446,18 +463,18 @@ namespace lsgl
 							depthBuffer->setPixelUnit(x, y, reinterpret_cast<uint8_t *>(&depth));
 							// write color
 							Vector4 color;
-							Sampler* pSampler = getSampler(LayoutBinding::DiffuseTexture);
-							if (pSampler)
+							if (shader)
 							{
-								color = pSampler->getSample(finalVertex.uv.x, finalVertex.uv.y);
+								shader->fragment = &finalVertex;
+								color = shader->fragmentShading();
 							}
 							else
 							{
 								color = finalVertex.color;
 							}
-							colorBuffer->setByte(x, y, (uint8_t)(color.z * 255), 0);
-							colorBuffer->setByte(x, y, (uint8_t)(color.y * 255), 1);
-							colorBuffer->setByte(x, y, (uint8_t)(color.x * 255), 2);
+							colorBuffer->setByte(x, y, (uint8_t)(std::fmax(0.0, std::fmin(1.0, color.z)) * 255), 0);
+							colorBuffer->setByte(x, y, (uint8_t)(std::fmax(0.0, std::fmin(1.0, color.y)) * 255), 1);
+							colorBuffer->setByte(x, y, (uint8_t)(std::fmax(0.0, std::fmin(1.0, color.x)) * 255), 2);
 							++setPixelCount;
 						}
 					}
@@ -487,8 +504,8 @@ namespace lsgl
 				prevEedge->pLow.x = higherX;
 				prevEedge->pLow.y = lineY;
 
-				prevEedge->dx = prevEedge->dx * (1 - ratio) + 0.5;
-				prevEedge->dy = prevEedge->dy * (1 - ratio) + 0.5;
+				prevEedge->dx = static_cast<int>(prevEedge->dx * (1 - ratio) + 0.5f);
+				prevEedge->dy = static_cast<int>(prevEedge->dy * (1 - ratio) + 0.5f);
 			}
 		}
 	}
@@ -500,10 +517,10 @@ namespace lsgl
 
 	void Renderer::lineTo(const Vertex & p0, const Vertex & p1)
 	{
-		int x0 = (p0.position.x + 1) / 2 * viewWidth;
-		int y0 = (p0.position.y + 1) / 2 * viewHeight;
-		int x1 = (p1.position.x + 1) / 2 * viewWidth;
-		int y1 = (p1.position.y + 1) / 2 * viewHeight;
+		int x0 = static_cast<int>((p0.position.x + 1) / 2 * viewWidth);
+		int y0 = static_cast<int>((p0.position.y + 1) / 2 * viewHeight);
+		int x1 = static_cast<int>((p1.position.x + 1) / 2 * viewWidth);
+		int y1 = static_cast<int>((p1.position.y + 1) / 2 * viewHeight);
 
 		int dx = abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
 		int dy = abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
@@ -553,14 +570,14 @@ namespace lsgl
 		return depthBuffer;
 	}
 
-	void Renderer::setSampler(LayoutBinding binding, Sampler * sampler)
+	void Renderer::setSampler(LayoutBinding binding, const SamplerPtr& sampler)
 	{
-		samplers[static_cast<uint32_t>(binding)] = sampler;
+		samplers[binding] = sampler;
 	}
 
-	Sampler* Renderer::getSampler(LayoutBinding binding)
+	SamplerPtr Renderer::getSampler(LayoutBinding binding)
 	{
-		auto findResult = samplers.find(static_cast<uint32_t>(binding));
+		auto findResult = samplers.find(binding);
 		if (findResult == samplers.end())
 		{
 			return nullptr;
@@ -568,9 +585,27 @@ namespace lsgl
 		return findResult->second;
 	}
 
-	void Renderer::setShader(Shader * inShader)
+	void Renderer::setShader(const std::shared_ptr<Shader>& inShader)
 	{
 		shader = inShader;
 		shader->setRenderContext(this);
+	}
+
+	void Renderer::setDescriptorSet(const std::vector<DescriptorPtr>& descriptors)
+	{
+		for (DescriptorPtr descriptor : descriptors)
+		{
+			descriptorSet[descriptor->binding] = descriptor;
+		}
+	}
+
+	DescriptorPtr Renderer::getDescriptor(const DescriptorBinding& binding)
+	{
+		auto findResult = descriptorSet.find(binding);
+		if (findResult == descriptorSet.end())
+		{
+			return nullptr;
+		}
+		return findResult->second;
 	}
 }

@@ -13,7 +13,8 @@ namespace lsgl
 		Vector4 position;
 		Vector4 color;
 		Vector2 uv;
-		//Vector3 normal;
+		Vector3 normal;
+		Vector3 worldPosition;
 	};
 	typedef std::vector<Vertex> Vertexes;
 
@@ -22,6 +23,8 @@ namespace lsgl
 		Vector4::add(vertexLeft.position, vertexRight.position, result.position);
 		Vector4::add(vertexLeft.color, vertexRight.color, result.color);
 		Vector2::add(vertexLeft.uv, vertexRight.uv, result.uv);
+		Vector3::add(vertexLeft.normal, vertexRight.normal, result.normal);
+		Vector3::add(vertexLeft.worldPosition, vertexRight.worldPosition, result.worldPosition);
 		return result;
 	}
 
@@ -30,6 +33,8 @@ namespace lsgl
 		Vector4::substract(vertexLeft.position, vertexRight.position, result.position);
 		Vector4::substract(vertexLeft.color, vertexRight.color, result.color);
 		Vector2::substract(vertexLeft.uv, vertexRight.uv, result.uv);
+		Vector3::substract(vertexLeft.normal, vertexRight.normal, result.normal);
+		Vector3::substract(vertexLeft.worldPosition, vertexRight.worldPosition, result.worldPosition);
 		return result;
 	}
 
@@ -38,6 +43,8 @@ namespace lsgl
 		Vector4::multiply(vertex.position, scalar, result.position);
 		Vector4::multiply(vertex.color, scalar, result.color);
 		Vector2::multiply(vertex.uv, scalar, result.uv);
+		Vector3::multiply(vertex.normal, scalar, result.normal);
+		Vector3::multiply(vertex.worldPosition, scalar, result.worldPosition);
 		return result;
 	}
 }

@@ -8,9 +8,9 @@ namespace lsgl
 	struct Point2D
 	{
 		Point2D() :x(0), y(0) {}
-		Point2D(int64_t _x, int64_t _y) :x(_x), y(_y) {}
-		int64_t x;
-		int64_t y;
+		Point2D(int32_t _x, int32_t _y) :x(_x), y(_y) {}
+		int32_t x;
+		int32_t y;
 
 		bool operator==(const Point2D &point)
 		{
@@ -94,7 +94,9 @@ namespace lsgl
 
 		inline Point2D normalizeCoordToScreenCoord(const Vector3& coord)
 		{
-			return Point2D((coord.x + 1) / 2 * width, (coord.y + 1) / 2 * height);
+			int32_t x = static_cast<int32_t>((coord.x + 1) / 2 * width);
+			int32_t y = static_cast<int32_t>((coord.y + 1) / 2 * height);
+			return Point2D(x, y);
 		}
 	private:
 		uint8_t* data;

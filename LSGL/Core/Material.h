@@ -4,7 +4,7 @@
 #include "../Math/Vector4.h"
 #include "Texture.h"
 
-class aiMaterial;
+struct aiMaterial;
 namespace lsgl
 {
 	enum class MaterialTextureType : uint8_t

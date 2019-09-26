@@ -14,7 +14,7 @@ namespace lsgl
 			pTexture = inTexture;
 		}
 
-		Vector4 getSample(float x, float y)
+		Vector4 getSample(LSFloat x, LSFloat y)
 		{
 			if (!pTexture)
 			{
@@ -26,12 +26,13 @@ namespace lsgl
 			y = y < 0 ? 0 : y;
 			y = y > 1 ? 1 : y;
 
-			uint32_t intX = x * pTexture->width;
-			uint32_t intY = y * pTexture->height;
+			uint32_t intX = static_cast<uint32_t>(x * pTexture->width);
+			uint32_t intY = static_cast<uint32_t>(y * pTexture->height);
 			return pTexture->getColor(intX, intY);
 		}
 	private:
 		Texture* pTexture;
 	};
 
+	using SamplerPtr = std::shared_ptr<Sampler>;
 }

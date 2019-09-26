@@ -22,7 +22,7 @@ namespace lsgl
 			return nullptr;
 		}
 
-		uint32_t materialId = static_cast<uint16_t>(textureType) << 4 + index;
+		uint32_t materialId = (static_cast<uint16_t>(textureType) << 4) + index;
 		auto findResult = textureCaches.find(materialId);
 		if (findResult != textureCaches.end())
 		{
@@ -38,7 +38,7 @@ namespace lsgl
 				int width, height, compInFile;
 				int comp = 3;
 				stbi_uc* imageData = stbi_load((modelFileBaseDir + "/" + diffuseTexturePath.C_Str()).c_str(), &width, &height, &compInFile, comp);
-				pTexture = new Texture(width, height, imageData, comp);
+				pTexture = new Texture(width, height, imageData, static_cast<uint8_t>(comp));
 			}
 		}
 		else if(textureType == MaterialTextureType::Specular)
@@ -49,7 +49,7 @@ namespace lsgl
 				int width, height, compInFile;
 				int comp = 1;
 				stbi_uc* imageData = stbi_load((modelFileBaseDir + "/" + specularTexturePath.C_Str()).c_str(), &width, &height, &compInFile, comp);
-				pTexture = new Texture(width, height, imageData, comp);
+				pTexture = new Texture(width, height, imageData, static_cast<uint8_t>(comp));
 			}
 		}
 

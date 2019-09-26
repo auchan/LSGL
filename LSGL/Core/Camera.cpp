@@ -34,7 +34,7 @@ namespace lsgl
 		}
 		else
 		{
-			float halfFovRadian = degree2radian(fov / 2);
+			LSFloat halfFovRadian = static_cast<LSFloat>(degree2radian(fov / 2));
 			mat.m11 = 1 / (aspectRatio * std::tan(halfFovRadian));
 			mat.m22 = 1 / std::tan(halfFovRadian);
 			mat.m33 = farPlane / (farPlane - nearPlane);

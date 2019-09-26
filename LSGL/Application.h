@@ -58,8 +58,8 @@ namespace lsgl
 		int viewWidth;
 		int viewHeight;
 
-		double deltaTime = 0;
-		double lastUpdateTime = 0;
+		float deltaTime = 0;
+		float lastUpdateTime = 0;
 
 		std::set<int> keyDownSet;
 		RenderMode renderMode = RenderMode::Surface;
