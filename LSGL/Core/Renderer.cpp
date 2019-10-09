@@ -106,6 +106,9 @@ namespace lsgl
 		}
 	}
 
+	/*
+	* Clip without perspective correct
+	*/
 	void clipProcess(Vertexes & vertexes, int stage, Vertexes & outputVertexes)
 	{
 		if (stage > 6)
@@ -248,19 +251,164 @@ namespace lsgl
 			}
 		}
 		clipProcess(innerVertexes, ++stage, outputVertexes);
-		//regionCode |= sign * pos.x < -absw ? leftBitCode : 0;
-		//regionCode |= sign * pos.x > absw ? rightBitCode : 0;
-		//regionCode |= sign * pos.y < -absw ? bottomBitCode : 0;
-		//regionCode |= sign * pos.y > absw ? topBitCode : 0;
-		//regionCode |= sign * pos.z < -absw ? nearBitCode : 0;
-		//regionCode |= sign * pos.z > absw ? farBitCode : 0;
+	}
+
+	/*
+	* Clip with perspective correct
+	* produce vertexes that satisfy :
+	*  -w <= x <= w
+	*  -w <= y <= w
+	*   0 <= z <= w
+	*/
+	void clipProcessV2(Vertexes & vertexes, int stage, Vertexes & outputVertexes)
+	{
+		// This function should take 6 pass correspond to the face of clip volume
+		if (stage > 6)
+		{
+			outputVertexes = vertexes;
+			return;
+		}
+
+		uint8_t regionCode0 = 0, regionCode1 = 0;
+		auto begin = vertexes.begin();
+		auto end = vertexes.end();
+		Vertexes innerVertexes = Vertexes();
+		for (auto cur = begin; cur != end; ++cur)
+		{
+			Vertex &v0 = *cur;
+			auto tmpIter = begin;
+			if ((cur + 1) != end)
+			{
+				tmpIter = cur + 1;
+			}
+			Vertex &v1 = *tmpIter;
+
+			Vector4 &pos0 = v0.position;
+			Vector4 &pos1 = v1.position;
+			LSFloat clipAlpha = 0.0f;
+			LSFloat w0 = (pos0.w);
+			LSFloat w1 = (pos1.w);
+			LSFloat absw0 = std::fabs(w0);
+			LSFloat absw1 = std::fabs(w1);
+
+			// The w component be negative means the point before near plane
+			bool w0Valid = pos0.w > 1e-6;
+			bool w1Valid = pos1.w > 1e-6;
+			bool isWValid = w0Valid || w1Valid;
+			// If both w0 and w1 are invalid, exclude them.
+			if (!isWValid)
+			{
+				continue;
+			}
+
+			LSFloat x0 = pos0.x; LSFloat x1 = pos1.x;
+			LSFloat y0 = pos0.y; LSFloat y1 = pos1.y;
+			LSFloat z0 = pos0.z; LSFloat z1 = pos1.z;
+
+			LSFloat a0;
+			LSFloat a1;
+			LSFloat dz1, dw1, w;
+			LSFloat needCalcAlpha = true;
+
+			switch (stage)
+			{
+			case 1:
+				regionCode0 = (x0 <= -absw0 ? leftBitCode : 0);
+				regionCode1 = (x1 <= -absw1 ? leftBitCode : 0);
+				a0 = x0; a1 = x1;
+				w0 = -absw0; w1 = -absw1;
+				break;
+			case 2:
+				regionCode0 = (x0 >= absw0 ? rightBitCode : 0);
+				regionCode1 = (x1 >= absw1 ? rightBitCode : 0);
+				a0 = x0; a1 = x1;
+				break;
+			case 3:
+				regionCode0 = (y0 <= -absw0 ? bottomBitCode : 0);
+				regionCode1 = (y1 <= -absw1 ? bottomBitCode : 0);
+				a0 = y0; a1 = y1;
+				w0 = -absw0; w1 = -absw1;
+				break;
+			case 4:
+				regionCode0 = (y0 >= absw0 ? topBitCode : 0);
+				regionCode1 = (y1 >= absw1 ? topBitCode : 0);
+				a0 = y0; a1 = y1;
+				break;
+			case 5:
+				regionCode0 = (z0 <= 0 ? nearBitCode : 0);
+				regionCode1 = (z1 <= 0 ? nearBitCode : 0);
+				dw1 = w1 - w0;
+				dz1 = z1 - z0;
+				if (regionCode0 != regionCode1 && std::fabs(dz1) > 1e-6 && std::fabs(dw1) > 1e-6)
+				{
+					// let z = f(w), if line z = aw + b intersect with near plane
+					// forms these equation:
+					// z1 = aw1 + b
+					// z0 = aw0 + b
+					// 0 = aw + b  (z = 0 in near plane)
+					w = (w0 * z1 - w1 * z0) / dz1;
+					clipAlpha = (w - w0) / dw1;
+				}
+				needCalcAlpha = false;
+				break;
+			case 6:
+				regionCode0 = (z0 >= absw0 ? topBitCode : 0);
+				regionCode1 = (z1 >= absw1 ? topBitCode : 0);
+				dw1 = w1 - w0;
+				dz1 = z1 - z0;
+				if (regionCode0 != regionCode1 && std::fabs(dw1 - dz1) > 1e-6 && std::fabs(dw1) > 1e-6)
+				{
+					// let z = f(w), if line z = aw + b intersect with far plane
+					// forms these equation:
+					// z1 = aw1 + b
+					// z0 = aw0 + b
+					// w = aw + b  (z = w in far plane)
+					w = (w1 * z0 - w0 * z1) / (dw1 - dz1);
+					clipAlpha = (w - w0) / dw1;
+				}
+				needCalcAlpha = false;
+				break;
+			default:
+				break;
+			}
+
+			LSFloat daw1 = a1 - w1;
+			if (needCalcAlpha && regionCode0 != regionCode1 && std::fabs(daw1) > 1e-6)
+			{
+				// infered by homothetic triangle
+				// explain later!
+				LSFloat f = (a0 - w0) / -daw1;
+				LSFloat w = f * (w1 - w0) / (f + 1.0) + w0;
+				clipAlpha = (w - w0) / (w1 - w0);
+			}
+
+			Vertex v2 = v0;
+			Vertex::add(v0, Vertex::multiply(Vertex::substract(v1, v0, v2), clipAlpha, v2), v2);
+			if (regionCode0 == 0 && regionCode1 == 0)
+			{
+				innerVertexes.push_back(v1);
+			}
+			else if (regionCode0 == 0 && regionCode1 != 0)
+			{
+				innerVertexes.push_back(v2);
+			}
+			else if (regionCode0 != 0 && regionCode1 == 0)
+			{
+				innerVertexes.push_back(v2);
+				innerVertexes.push_back(v1);
+			}
+			else
+			{
+				// exlude
+			}
+		}
+		clipProcessV2(innerVertexes, ++stage, outputVertexes);
 	}
 
 	void Renderer::clip(Vertexes & vertexes, Vertexes & outputVertexes)
 	{
-		clipProcess(vertexes, 1, outputVertexes);
+		clipProcessV2(vertexes, 1, outputVertexes);
 	}
-
 
 	void Renderer::fillPolygon(const Vertexes & vertexes)
 	{

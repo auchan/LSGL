@@ -62,7 +62,7 @@ namespace lsgl
 		float lastUpdateTime = 0;
 
 		std::set<int> keyDownSet;
-		RenderMode renderMode = RenderMode::Surface;
+		RenderMode renderMode = RenderMode::Wireframe;
 	};
 }
 

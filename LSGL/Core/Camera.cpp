@@ -7,7 +7,7 @@ namespace lsgl
 	Camera::Camera()
 		:aspectRatio(1)
 		, nearPlane(1)
-		, farPlane(10000)
+		, farPlane(400)
 		, fov(90)
 		, size(100)
 		, isOrthographic(false)

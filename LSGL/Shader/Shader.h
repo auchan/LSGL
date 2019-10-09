@@ -25,6 +25,9 @@ namespace lsgl
 		virtual Vector4 vertexShading() = 0;
 		virtual Vector4 fragmentShading() = 0;
 
+		// require by POLYMORPHISM
+		virtual ~Shader() {}
+
 		Vertex* vertex;
 		Vertex* fragment;
 	protected:
