@@ -13,6 +13,12 @@ namespace lsgl
 		Count,
 	};
 
+	enum class FaceMode : uint8_t
+	{
+		CW,		// clockwise
+		CCW,	// counter-clockwise
+	};
+
 	enum class PiplineStageBit : uint8_t
 	{
 		Vertex = 0x1,

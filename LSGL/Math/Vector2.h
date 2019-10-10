@@ -13,17 +13,17 @@ namespace lsgl
 		Vector2(const Vector4 &&vec4);
 
 	public:
-		Vector2 add(const Vector2 &vec2);
+		Vector2 add(const Vector2 &vec2) const;
 		static Vector2& add(const Vector2 &vecLeft, const Vector2 &vecRight, Vector2 &result);
-		Vector2 substract(const Vector2 &vec2);
+		Vector2 substract(const Vector2 &vec2) const;
 		static Vector2& substract(const Vector2 &vecLeft, const Vector2 &vecRight, Vector2 &result);
-		Vector2 multiply(const Vector2 &vec2);
-		Vector2 multiply(LSFloat scalar);
+		Vector2 multiply(const Vector2 &vec2) const;
+		Vector2 multiply(LSFloat scalar) const;
 		static Vector2& multiply(const Vector2 &vec2, LSFloat scalar, Vector2 &result);
-		Vector2 divide(LSFloat divisor);
-		LSFloat dot(const Vector2 &vec2);
+		Vector2 divide(LSFloat divisor) const;
+		LSFloat dot(const Vector2 &vec2) const;
 		Vector2& inverse();
-		LSFloat length()
+		LSFloat length() const
 		{
 			return sqrt(x * x + y * y);
 		}
@@ -42,11 +42,11 @@ namespace lsgl
 	public:
 		// operator overwrite
 		Vector2& operator=(const Vector2 &vec2);
-		Vector2 operator+(const Vector2 &vec2);
-		Vector2 operator-(const Vector2 &vec2);
-		Vector2 operator*(const Vector2 &vec2);
-		Vector2 operator*(LSFloat scalar);
-		Vector2 operator/(LSFloat divisor);
+		Vector2 operator+(const Vector2 &vec2) const;
+		Vector2 operator-(const Vector2 &vec2) const;
+		Vector2 operator*(const Vector2 &vec2) const;
+		Vector2 operator*(LSFloat scalar) const;
+		Vector2 operator/(LSFloat divisor) const;
 
 	public:
 		LSFloat x;

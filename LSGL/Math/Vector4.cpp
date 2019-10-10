@@ -32,7 +32,7 @@ namespace lsgl
 	{
 	}
 
-	Vector4 Vector4::add(const Vector4 & vec4)
+	Vector4 Vector4::add(const Vector4 & vec4) const
 	{
 		Vector4 result;
 		result.x = this->x + vec4.x;
@@ -42,7 +42,7 @@ namespace lsgl
 		return result;
 	}
 
-	Vector4 Vector4::substract(const Vector4 & vec4)
+	Vector4 Vector4::substract(const Vector4 & vec4) const
 	{
 		Vector4 result;
 		result.x = this->x - vec4.x;
@@ -52,7 +52,7 @@ namespace lsgl
 		return result;
 	}
 
-	Vector4 Vector4::multiply(const Vector4 & vec4)
+	Vector4 Vector4::multiply(const Vector4 & vec4) const
 	{
 		Vector4 result;
 		result.x = this->x * vec4.x;
@@ -62,7 +62,7 @@ namespace lsgl
 		return result;
 	}
 
-	Vector4 Vector4::multiply(LSFloat scalar)
+	Vector4 Vector4::multiply(LSFloat scalar) const
 	{
 		Vector4 result;
 		result.x = this->x * scalar;
@@ -72,7 +72,7 @@ namespace lsgl
 		return result;
 	}
 
-	Vector4 Vector4::divide(LSFloat divisor)
+	Vector4 Vector4::divide(LSFloat divisor) const
 	{
 		Vector4 result;
 		result.x = this->x / divisor;
@@ -82,7 +82,7 @@ namespace lsgl
 		return result;
 	}
 
-	LSFloat Vector4::dot(const Vector4 & vec4)
+	LSFloat Vector4::dot(const Vector4 & vec4) const
 	{
 		LSFloat result = this->x * vec4.x + this->y * vec4.y + this->z * vec4.z + this->w * vec4.w;
 		return result;
@@ -96,7 +96,7 @@ namespace lsgl
 				|b.y b.z|*i + |b.x b.z|*j + |b.x b.y|*k
 			  = (a.y*b.z - a.z*b.y)i - (a.x*b.z - a.z*b.x)j + (a.x*b.y - a.y*b.x)k
 	*/
-	Vector4 Vector4::cross(const Vector4 & vec4)
+	Vector4 Vector4::cross(const Vector4 & vec4) const
 	{
 		const Vector4 &a = *this;
 		const Vector4 &b = vec4;
@@ -108,27 +108,27 @@ namespace lsgl
 		return result;
 	}
 
-	Vector4 Vector4::operator+(const Vector4 & vec4)
+	Vector4 Vector4::operator+(const Vector4 & vec4) const
 	{
 		return add(vec4);
 	}
 
-	Vector4 Vector4::operator-(const Vector4 & vec4)
+	Vector4 Vector4::operator-(const Vector4 & vec4) const
 	{
 		return substract(vec4);
 	}
 
-	Vector4 Vector4::operator*(const Vector4 & vec4)
+	Vector4 Vector4::operator*(const Vector4 & vec4) const
 	{
 		return multiply(vec4);
 	}
 
-	Vector4 Vector4::operator*(LSFloat scalar)
+	Vector4 Vector4::operator*(LSFloat scalar) const
 	{
 		return multiply(scalar);
 	}
 
-	Vector4 Vector4::operator/(LSFloat divisor)
+	Vector4 Vector4::operator/(LSFloat divisor) const
 	{
 		return divide(divisor);
 	}

@@ -29,13 +29,13 @@ namespace lsgl
 		this->y = vec4.y;
 	}
 
-	Vector2 Vector2::add(const Vector2 & vec2)
+	Vector2 Vector2::add(const Vector2 & vec2) const
 	{
 		Vector2 result;
 		return add(*this, vec2, result);
 	}
 
-	Vector2 Vector2::substract(const Vector2 & vec2)
+	Vector2 Vector2::substract(const Vector2 & vec2) const
 	{
 		Vector2 result;
 		result.x = this->x - vec2.x;
@@ -43,7 +43,7 @@ namespace lsgl
 		return result;
 	}
 
-	Vector2 Vector2::multiply(const Vector2 & vec2)
+	Vector2 Vector2::multiply(const Vector2 & vec2) const
 	{
 		Vector2 result;
 		result.x = this->x * vec2.x;
@@ -51,13 +51,13 @@ namespace lsgl
 		return result;
 	}
 
-	Vector2 Vector2::multiply(LSFloat scalar)
+	Vector2 Vector2::multiply(LSFloat scalar) const
 	{
 		Vector2 result;
 		return multiply(*this, scalar, result);
 	}
 
-	Vector2 Vector2::divide(LSFloat divisor)
+	Vector2 Vector2::divide(LSFloat divisor) const
 	{
 		Vector2 result;
 		result.x = this->x / divisor;
@@ -65,7 +65,7 @@ namespace lsgl
 		return result;
 	}
 
-	LSFloat Vector2::dot(const Vector2 & vec2)
+	LSFloat Vector2::dot(const Vector2 & vec2) const
 	{
 		LSFloat result = this->x * vec2.x + this->y * vec2.y;
 		return result;
@@ -85,27 +85,27 @@ namespace lsgl
 		return *this;
 	}
 
-	Vector2 Vector2::operator+(const Vector2 & vec2)
+	Vector2 Vector2::operator+(const Vector2 & vec2) const
 	{
 		return add(vec2);
 	}
 
-	Vector2 Vector2::operator-(const Vector2 & vec2)
+	Vector2 Vector2::operator-(const Vector2 & vec2) const
 	{
 		return substract(vec2);
 	}
 
-	Vector2 Vector2::operator*(const Vector2 & vec2)
+	Vector2 Vector2::operator*(const Vector2 & vec2) const
 	{
 		return multiply(vec2);
 	}
 
-	Vector2 Vector2::operator*(LSFloat scalar)
+	Vector2 Vector2::operator*(LSFloat scalar) const
 	{
 		return multiply(scalar);
 	}
 
-	Vector2 Vector2::operator/(LSFloat divisor)
+	Vector2 Vector2::operator/(LSFloat divisor) const
 	{
 		return divide(divisor);
 	}

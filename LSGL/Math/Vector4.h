@@ -13,24 +13,24 @@ namespace lsgl
 		~Vector4();
 
 	public:
-		Vector4 add(const Vector4 &vec4);
-		Vector4 substract(const Vector4 &vec4);
-		Vector4 multiply(const Vector4 &vec4);
-		Vector4 multiply(LSFloat scalar);
-		Vector4 divide(LSFloat divisor);
-		LSFloat dot(const Vector4 &vec4);
-		Vector4 cross(const Vector4 &vec4);
+		Vector4 add(const Vector4 &vec4) const;
+		Vector4 substract(const Vector4 &vec4) const;
+		Vector4 multiply(const Vector4 &vec4) const;
+		Vector4 multiply(LSFloat scalar) const;
+		Vector4 divide(LSFloat divisor) const;
+		LSFloat dot(const Vector4 &vec4) const;
+		Vector4 cross(const Vector4 &vec4) const;
 
 		inline static Vector4& add(const Vector4 &vecLeft, const Vector4 &vecRight, Vector4 &result);
 		inline static Vector4& substract(const Vector4 &vecLeft, const Vector4 &vecRight, Vector4 &result);
 		inline static Vector4& multiply(const Vector4 &vec4, LSFloat scalar, Vector4 &result);
 	public:
 		// operator overwrite
-		Vector4 operator+(const Vector4 &vec4);
-		Vector4 operator-(const Vector4 &vec4);
-		Vector4 operator*(const Vector4 &vec4);
-		Vector4 operator*(LSFloat scalar);
-		Vector4 operator/(LSFloat divisor);
+		Vector4 operator+(const Vector4 &vec4) const;
+		Vector4 operator-(const Vector4 &vec4) const;
+		Vector4 operator*(const Vector4 &vec4) const;
+		Vector4 operator*(LSFloat scalar) const;
+		Vector4 operator/(LSFloat divisor) const;
 
 		friend std::ostream& operator<<(std::ostream &os, Vector4 &vec4);
 

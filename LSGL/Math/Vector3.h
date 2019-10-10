@@ -13,22 +13,22 @@ namespace lsgl
 		Vector3(const Vector4 &&vec4);
 
 	public:
-		inline Vector3 add(const Vector3 &vec3);
+		inline Vector3 add(const Vector3 &vec3) const;
 		inline static Vector3& add(const Vector3 &vecLeft, const Vector3 &vecRight, Vector3 &result);
-		inline Vector3 substract(const Vector3 &vec3);
+		inline Vector3 substract(const Vector3 &vec3) const;
 		inline static Vector3& substract(const Vector3 &vecLeft, const Vector3 &vecRight, Vector3 &result);
-		inline Vector3 multiply(const Vector3 &vec3);
-		inline Vector3 multiply(LSFloat scalar);
+		inline Vector3 multiply(const Vector3 &vec3) const;
+		inline Vector3 multiply(LSFloat scalar) const;
 		inline static Vector3& multiply(const Vector3 &vec3, LSFloat scalar, Vector3 &result);
-		inline Vector3 divide(LSFloat divisor);
-		inline LSFloat dot(const Vector3 &vec3);
-		inline Vector3 cross(const Vector3 &vec3);
+		inline Vector3 divide(LSFloat divisor) const;
+		inline LSFloat dot(const Vector3 &vec3) const;
+		inline Vector3 cross(const Vector3 &vec3) const;
 		inline Vector3& inverse();
-		LSFloat length()
+		LSFloat length() const
 		{
-			return sqrt(lengthPow());
+			return sqrt(lengthSquared());
 		}
-		LSFloat lengthPow()
+		LSFloat lengthSquared() const
 		{
 			return x * x + y * y + z * z;
 		}
@@ -48,11 +48,11 @@ namespace lsgl
 	public:
 		// operator overwrite
 		inline Vector3& operator=(const Vector3 &vec3);
-		inline Vector3 operator+(const Vector3 &vec3);
-		inline Vector3 operator-(const Vector3 &vec3);
-		inline Vector3 operator*(const Vector3 &vec3);
-		inline Vector3 operator*(LSFloat scalar);
-		inline Vector3 operator/(LSFloat divisor);
+		inline Vector3 operator+(const Vector3 &vec3) const;
+		inline Vector3 operator-(const Vector3 &vec3) const;
+		inline Vector3 operator*(const Vector3 &vec3) const;
+		inline Vector3 operator*(LSFloat scalar) const;
+		inline Vector3 operator/(LSFloat divisor) const;
 
 	public:
 		LSFloat x;
@@ -101,13 +101,13 @@ namespace lsgl
 	{
 	}
 
-	inline Vector3 Vector3::add(const Vector3 & vec3)
+	inline Vector3 Vector3::add(const Vector3 & vec3) const
 	{
 		Vector3 result;
 		return add(*this, vec3, result);
 	}
 
-	inline Vector3 Vector3::substract(const Vector3 & vec3)
+	inline Vector3 Vector3::substract(const Vector3 & vec3) const
 	{
 		Vector3 result;
 		result.x = this->x - vec3.x;
@@ -116,7 +116,7 @@ namespace lsgl
 		return result;
 	}
 
-	inline Vector3 Vector3::multiply(const Vector3 & vec3)
+	inline Vector3 Vector3::multiply(const Vector3 & vec3) const
 	{
 		Vector3 result;
 		result.x = this->x * vec3.x;
@@ -125,13 +125,13 @@ namespace lsgl
 		return result;
 	}
 
-	inline Vector3 Vector3::multiply(LSFloat scalar)
+	inline Vector3 Vector3::multiply(LSFloat scalar) const
 	{
 		Vector3 result;
 		return multiply(*this, scalar, result);
 	}
 
-	inline Vector3 Vector3::divide(LSFloat divisor)
+	inline Vector3 Vector3::divide(LSFloat divisor) const
 	{
 		Vector3 result;
 		result.x = this->x / divisor;
@@ -140,7 +140,7 @@ namespace lsgl
 		return result;
 	}
 
-	inline LSFloat Vector3::dot(const Vector3 & vec3)
+	inline LSFloat Vector3::dot(const Vector3 & vec3) const
 	{
 		LSFloat result = this->x * vec3.x + this->y * vec3.y + this->z * vec3.z;
 		return result;
@@ -154,14 +154,14 @@ namespace lsgl
 				|b.y b.z|*i + |b.x b.z|*j + |b.x b.y|*k
 			  = (a.y*b.z - a.z*b.y)i - (a.x*b.z - a.z*b.x)j + (a.x*b.y - a.y*b.x)k
 	*/
-	inline Vector3 Vector3::cross(const Vector3 & vec3)
+	inline Vector3 Vector3::cross(const Vector3 & vec3) const
 	{
 		const Vector3 &a = *this;
 		const Vector3 &b = vec3;
 		Vector3 result;
 		result.x = a.y*b.z - a.z*b.y;
-		result.x = a.x*b.z - a.z*b.x;
-		result.x = a.x*b.y - a.y*b.x;
+		result.y = a.x*b.z - a.z*b.x;
+		result.z = a.x*b.y - a.y*b.x;
 		return result;
 	}
 
@@ -181,27 +181,27 @@ namespace lsgl
 		return *this;
 	}
 
-	inline Vector3 Vector3::operator+(const Vector3 & vec3)
+	inline Vector3 Vector3::operator+(const Vector3 & vec3) const
 	{
 		return add(vec3);
 	}
 
-	inline Vector3 Vector3::operator-(const Vector3 & vec3)
+	inline Vector3 Vector3::operator-(const Vector3 & vec3) const
 	{
 		return substract(vec3);
 	}
 
-	inline Vector3 Vector3::operator*(const Vector3 & vec3)
+	inline Vector3 Vector3::operator*(const Vector3 & vec3) const
 	{
 		return multiply(vec3);
 	}
 
-	inline Vector3 Vector3::operator*(LSFloat scalar)
+	inline Vector3 Vector3::operator*(LSFloat scalar) const
 	{
 		return multiply(scalar);
 	}
 
-	inline Vector3 Vector3::operator/(LSFloat divisor)
+	inline Vector3 Vector3::operator/(LSFloat divisor) const
 	{
 		return divide(divisor);
 	}

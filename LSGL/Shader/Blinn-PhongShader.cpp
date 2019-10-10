@@ -23,7 +23,7 @@ namespace lsgl
 		static Vector3 lightPos = Vector3(0, 300, 200);
 		static float lightPower = 100000;
 		Vector3 lightDir = (lightPos - fragment->worldPosition);
-		LSFloat distance = lightDir.lengthPow();
+		LSFloat distance = lightDir.lengthSquared();
 		lightDir = lightDir.normalize();
 		static Vector3 lightColor = Vector3(1, 1, 1) * lightPower / distance;
 

@@ -17,6 +17,8 @@ namespace lsgl
 		void renderVertices(const Vertexes &vertexes, RenderMode renderMode = RenderMode::Surface);
 		void renderTriangle(const Vertex &p0, const Vertex &p1, const Vertex &p2, RenderMode renderMode = RenderMode::Surface);
 		void clip(Vertexes &vertexes, Vertexes &outputVertexes /* out*/);
+		// Is the face be culled?
+		bool cullFace(const Vertexes &vertexes);
 		void fillPolygon(const Vertexes &vertexes);
 		void lineTo(const Vertex &p0, const Vertex &p1);
 
@@ -24,6 +26,8 @@ namespace lsgl
 
 		RenderBuffer* getColorBuffer();
 		RenderBuffer* getDepthBuffer();
+
+		void setFrontFace(FaceMode mode);
 
 		void setSampler(LayoutBinding binding, const SamplerPtr &sampler);
 		SamplerPtr getSampler(LayoutBinding binding);
@@ -40,6 +44,7 @@ namespace lsgl
 		std::unordered_map<LayoutBinding, SamplerPtr> samplers;
 		std::shared_ptr<Shader> shader;
 		std::unordered_map<DescriptorBinding, DescriptorPtr> descriptorSet;
+		FaceMode frontFace;
 	};
 
 }

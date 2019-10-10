@@ -24,6 +24,7 @@ namespace lsgl
 		: viewWidth(_viewWidth)
 		, viewHeight(_viewHeight)
 		, shader(nullptr)
+		, frontFace(FaceMode::CCW)
 	{
 		colorBuffer = new RenderBuffer(viewWidth, viewHeight);
 		depthBuffer = new RenderBuffer(viewWidth, viewHeight, DEPTH_FORMAT_BYTES);
@@ -85,6 +86,11 @@ namespace lsgl
 		for (Vertex &vertex : vertexes)
 		{
 			vertex.position = vertex.position / vertex.position.w;
+		}
+
+		if (cullFace(vertexes))
+		{
+			return;
 		}
 
 		if (renderMode == RenderMode::Surface)
@@ -410,6 +416,28 @@ namespace lsgl
 		clipProcessV2(vertexes, 1, outputVertexes);
 	}
 
+	bool Renderer::cullFace(const Vertexes & vertexes)
+	{
+		if (vertexes.size() < 3)
+		{
+			return true;
+		}
+		Vector3 n0 = Vector3(vertexes[1].position - vertexes[0].position);
+		Vector3 n1 = Vector3(vertexes[2].position - vertexes[1].position);
+		n0.z = 0;
+		n1.z = 0;
+		Vector3 n2 = n0.cross(n1);
+
+		if (frontFace == FaceMode::CCW)
+		{
+			return n2.z >= 0;
+		}
+		else
+		{
+			return n2.z < 0;
+		}
+	}
+
 	void Renderer::fillPolygon(const Vertexes & vertexes)
 	{
 		if (vertexes.size() < 3)
@@ -716,6 +744,11 @@ namespace lsgl
 	RenderBuffer * Renderer::getDepthBuffer()
 	{
 		return depthBuffer;
+	}
+
+	void Renderer::setFrontFace(FaceMode mode)
+	{
+		frontFace = mode;
 	}
 
 	void Renderer::setSampler(LayoutBinding binding, const SamplerPtr& sampler)
